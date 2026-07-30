@@ -1283,6 +1283,9 @@ static int fts_drm_global_notifier(struct notifier_block *self,
 	return 0;
 }
 
+#if defined(CONFIG_DRM)          ← el #if queda DESPUÉS
+static void fts_resume_work(struct work_struct *work)
+
 static int fb_notifier_callback(struct notifier_block *self,
 				unsigned long event, void *data)
 {
@@ -1528,6 +1531,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		if (ret) {
 			FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
 		}
+
 		/* Registro DRM global: rescata el resume cuando active_panel falla */
 		ts_data->drm_notif.notifier_call = fts_drm_global_notifier;
 		ret = drm_register_client(&ts_data->drm_notif);
@@ -1535,12 +1539,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 			FTS_ERROR("drm_register_client fail: %d", ret);
 		else
 			FTS_INFO("drm_register_client OK (global notifier)");
-	
-	ts_data->fb_notif.notifier_call = fb_notifier_callback;
-	ret = fb_register_client(&ts_data->fb_notif);
-	if (ret) {
-		FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
-	}
+
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	ts_data->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + FTS_SUSPEND_LEVEL;
 	ts_data->early_suspend.suspend = fts_ts_early_suspend;
@@ -1609,11 +1608,12 @@ static int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 		if (active_panel)
 		drm_panel_notifier_unregister(active_panel, &ts_data->fb_notif);
 
-	drm_unregister_client(&ts_data->drm_notif);
-
 #elif defined(CONFIG_FB)
 	if (fb_unregister_client(&ts_data->fb_notif))
 		FTS_ERROR("Error occurred while unregistering fb_notifier.");
+
+	drm_unregister_client(&ts_data->drm_notif);          ← AQUÍ
+
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	unregister_early_suspend(&ts_data->early_suspend);
 #endif
