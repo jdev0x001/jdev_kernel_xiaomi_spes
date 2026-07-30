@@ -1611,8 +1611,10 @@ static int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 		destroy_workqueue(ts_data->ts_workqueue);
 
 #if defined(CONFIG_DRM)
-	if (active_panel)
+		if (active_panel)
 		drm_panel_notifier_unregister(active_panel, &ts_data->fb_notif);
+
+	drm_unregister_client(&ts_data->drm_notif);
 
 #elif defined(CONFIG_FB)
 	if (fb_unregister_client(&ts_data->fb_notif))
