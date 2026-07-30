@@ -1244,18 +1244,9 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 	return 0;
 }
 
-#if defined(CONFIG_DRM)
-static void fts_resume_work(struct work_struct *work)
-{
-	struct fts_ts_data *ts_data = container_of(work, struct fts_ts_data,
-					resume_work);
-
-	fts_ts_resume(ts_data->dev);
-}
 /* Notifier DRM global: no depende de active_panel.
    Necesario para paneles Incell de repuesto donde panel1/panel2
    no resuelven al panel fisico. */
-
 static int fts_drm_global_notifier(struct notifier_block *self,
                                    unsigned long event, void *data)
 {
@@ -1283,7 +1274,16 @@ static int fts_drm_global_notifier(struct notifier_block *self,
 	return 0;
 }
 
-#if defined(CONFIG_DRM)          ← el #if queda DESPUÉS
+#if defined(CONFIG_DRM)
+static void fts_resume_work(struct work_struct *work)
+{
+	struct fts_ts_data *ts_data = container_of(work, struct fts_ts_data,
+					resume_work);
+
+	fts_ts_resume(ts_data->dev);
+}
+
+#if defined(CONFIG_DRM)         
 static void fts_resume_work(struct work_struct *work)
 
 static int fb_notifier_callback(struct notifier_block *self,
@@ -1612,7 +1612,7 @@ static int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 	if (fb_unregister_client(&ts_data->fb_notif))
 		FTS_ERROR("Error occurred while unregistering fb_notifier.");
 
-	drm_unregister_client(&ts_data->drm_notif);          ← AQUÍ
+	drm_unregister_client(&ts_data->drm_notif);         
 
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	unregister_early_suspend(&ts_data->early_suspend);
