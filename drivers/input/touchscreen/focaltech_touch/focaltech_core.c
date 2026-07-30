@@ -1255,6 +1255,7 @@ static void fts_resume_work(struct work_struct *work)
 /* Notifier DRM global: no depende de active_panel.
    Necesario para paneles Incell de repuesto donde panel1/panel2
    no resuelven al panel fisico. */
+
 static int fts_drm_global_notifier(struct notifier_block *self,
                                    unsigned long event, void *data)
 {
@@ -1518,18 +1519,16 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		FTS_ERROR("init fw upgrade fail");
 	}
 
-#if defined(CONFIG_DRM)
-	if (ts_data->ts_workqueue) {
-		INIT_WORK(&ts_data->resume_work, fts_resume_work);
-	}
-	ts_data->fb_notif.notifier_call = fb_notifier_callback;
-
-			if (active_panel &&
-			drm_panel_notifier_register(active_panel,
-				&ts_data->fb_notif) < 0)
-			FTS_ERROR("register notifier failed!\n");
-
-		/* Registro global adicional: rescata el resume cuando active_panel falla */
+#elif defined(CONFIG_FB)
+		if (ts_data->ts_workqueue) {
+			INIT_WORK(&ts_data->resume_work, fts_resume_work);
+		}
+		ts_data->fb_notif.notifier_call = fb_notifier_callback;
+		ret = fb_register_client(&ts_data->fb_notif);
+		if (ret) {
+			FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
+		}
+		/* Registro DRM global: rescata el resume cuando active_panel falla */
 		ts_data->drm_notif.notifier_call = fts_drm_global_notifier;
 		ret = drm_register_client(&ts_data->drm_notif);
 		if (ret)
@@ -1537,10 +1536,6 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		else
 			FTS_INFO("drm_register_client OK (global notifier)");
 	
-#elif defined(CONFIG_FB)
-	if (ts_data->ts_workqueue) {
-		INIT_WORK(&ts_data->resume_work, fts_resume_work);
-	}
 	ts_data->fb_notif.notifier_call = fb_notifier_callback;
 	ret = fb_register_client(&ts_data->fb_notif);
 	if (ret) {
