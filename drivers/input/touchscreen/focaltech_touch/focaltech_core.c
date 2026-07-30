@@ -1516,7 +1516,7 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		FTS_ERROR("init fw upgrade fail");
 	}
 	
-if defined(CONFIG_DRM)
+#if defined(CONFIG_DRM)
 		if (ts_data->ts_workqueue) {
 			INIT_WORK(&ts_data->resume_work, fts_resume_work);
 		}
