@@ -1661,16 +1661,17 @@ static int fts_ts_suspend(struct device *dev)
 	struct fts_ts_data *ts_data = fts_data;
 
 	FTS_FUNC_ENTER();
+
+	/* PARCHE: no suspender el TP. En paneles Incell de repuesto el
+	   resume nunca llega (active_panel no resuelve) y el tactil
+	   queda muerto permanentemente. */
+	FTS_INFO("suspend bloqueado por parche (panel Incell)");
+	return 0;
+
 	if (ts_data->suspended) {
 		FTS_INFO("Already in suspend state");
 		return 0;
 	}
-
-	if (ts_data->fw_loading) {
-		FTS_INFO("fw upgrade in process, can't suspend");
-		return 0;
-	}
-
 #if FTS_ESDCHECK_EN
 	fts_esdcheck_suspend();
 #endif
