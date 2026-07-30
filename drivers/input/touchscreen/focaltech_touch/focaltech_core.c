@@ -1515,6 +1515,17 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 	if (ret) {
 		FTS_ERROR("init fw upgrade fail");
 	}
+	
+if defined(CONFIG_DRM)
+		if (ts_data->ts_workqueue) {
+			INIT_WORK(&ts_data->resume_work, fts_resume_work);
+		}
+		ts_data->fb_notif.notifier_call = fb_notifier_callback;
+
+		if (active_panel &&
+			drm_panel_notifier_register(active_panel,
+				&ts_data->fb_notif) < 0)
+			FTS_ERROR("register notifier failed!\n");
 
 #elif defined(CONFIG_FB)
 		if (ts_data->ts_workqueue) {
