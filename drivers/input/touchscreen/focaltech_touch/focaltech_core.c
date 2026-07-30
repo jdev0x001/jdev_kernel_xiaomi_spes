@@ -1524,11 +1524,19 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 	}
 	ts_data->fb_notif.notifier_call = fb_notifier_callback;
 
-	if (active_panel &&
-		drm_panel_notifier_register(active_panel,
-			&ts_data->fb_notif) < 0)
-		FTS_ERROR("register notifier failed!\n");
+			if (active_panel &&
+			drm_panel_notifier_register(active_panel,
+				&ts_data->fb_notif) < 0)
+			FTS_ERROR("register notifier failed!\n");
 
+		/* Registro global adicional: rescata el resume cuando active_panel falla */
+		ts_data->drm_notif.notifier_call = fts_drm_global_notifier;
+		ret = drm_register_client(&ts_data->drm_notif);
+		if (ret)
+			FTS_ERROR("drm_register_client fail: %d", ret);
+		else
+			FTS_INFO("drm_register_client OK (global notifier)");
+	
 #elif defined(CONFIG_FB)
 	if (ts_data->ts_workqueue) {
 		INIT_WORK(&ts_data->resume_work, fts_resume_work);
