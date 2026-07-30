@@ -1281,13 +1281,7 @@ static void fts_resume_work(struct work_struct *work)
 					resume_work);
 
 	fts_ts_resume(ts_data->dev);
-}
 
-#if defined(CONFIG_DRM)         
-static void fts_resume_work(struct work_struct *work)
-
-static int fb_notifier_callback(struct notifier_block *self,
-				unsigned long event, void *data)
 {
 	struct drm_panel_notifier *evdata = data;
 	int *blank = NULL;
