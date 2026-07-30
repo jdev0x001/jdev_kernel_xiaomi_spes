@@ -1252,6 +1252,35 @@ static void fts_resume_work(struct work_struct *work)
 
 	fts_ts_resume(ts_data->dev);
 }
+/* Notifier DRM global: no depende de active_panel.
+   Necesario para paneles Incell de repuesto donde panel1/panel2
+   no resuelven al panel fisico. */
+static int fts_drm_global_notifier(struct notifier_block *self,
+                                   unsigned long event, void *data)
+{
+	struct drm_notify_data *evdata = data;
+	int *blank = NULL;
+
+	if (!evdata || !evdata->data)
+		return 0;
+
+	if (event != DRM_EVENT_BLANK)
+		return 0;
+
+	blank = evdata->data;
+	FTS_INFO("DRM global event:%lu, blank:%d", event, *blank);
+
+	if (*blank == DRM_BLANK_UNBLANK) {
+		if (fts_data && fts_data->suspended)
+			queue_work(fts_data->ts_workqueue,
+			           &fts_data->resume_work);
+	} else if (*blank == DRM_BLANK_POWERDOWN) {
+		if (fts_data && !fts_data->suspended)
+			fts_ts_suspend(fts_data->dev);
+	}
+
+	return 0;
+}
 
 static int fb_notifier_callback(struct notifier_block *self,
 				unsigned long event, void *data)
