@@ -1356,7 +1356,8 @@ source "drivers/input/touchscreen/ft3418_i2c/Kconfig"
 
 source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
 
-source "drivers/input/touchscreen/focaltech_touch/Kconfig"
+# FT3518 (focaltech_touch) is not used on spes; do not offer it
+#source "drivers/input/touchscreen/focaltech_touch/Kconfig"
 
 source "drivers/input/touchscreen/nt36xxx/Kconfig"
 

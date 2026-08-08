@@ -180,7 +180,6 @@ struct fts_ts_data {
     struct delayed_work esdcheck_work;
     struct delayed_work prc_work;
     struct work_struct resume_work;
-    struct work_struct suspend_work;
     struct ftxxxx_proc proc;
     spinlock_t irq_lock;
     struct mutex report_mutex;
@@ -221,7 +220,11 @@ struct fts_ts_data {
     struct pinctrl_state *pins_suspend;
     struct pinctrl_state *pins_release;
 #endif
-    struct notifier_block drm_notif;
+#if defined(CONFIG_FB) || defined(CONFIG_DRM)
+    struct notifier_block fb_notif;
+#elif defined(CONFIG_HAS_EARLYSUSPEND)
+    struct early_suspend early_suspend;
+#endif
 
 #ifdef CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE
     u8 palm_sensor_switch;
