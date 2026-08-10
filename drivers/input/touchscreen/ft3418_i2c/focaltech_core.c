@@ -1804,6 +1804,15 @@ static int fts_ts_probe_entry(struct fts_ts_data *ts_data)
         FTS_ERROR("init fw upgrade fail");
     }
 
+    /*
+     * Start scanning on replacement FT3418 panels.
+     * Keep normal charger-mode state (0); the 0x8B write itself
+     * is the required trigger.
+     */
+    ret = lct_fts_set_charger_mode(false);
+    if (ret < 0)
+        FTS_ERROR("failed to rearm FT3418 scan mode: %d", ret);
+
     if (ts_data->ts_workqueue) {
         INIT_WORK(&ts_data->resume_work, fts_resume_work);
     }
