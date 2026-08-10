@@ -1,9 +1,9 @@
 /*
+source "drivers/input/touchscreen/synaptics_tcm/Kconfig"
  *
  * FocalTech TouchScreen driver.
  *
  * Copyright (c) 2012-2020, FocalTech Systems, Ltd., all rights reserved.
- * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
@@ -174,6 +174,12 @@
 #define FTS_DEBUG_EN                            0
 
 /*
+ * Linux MultiTouch Protocol
+ * 1: Protocol B(default), 0: Protocol A
+ */
+#define FTS_MT_PROTOCOL_B_EN                    1
+
+/*
  * Report Pressure in multitouch
  * 1:enable(default),0:disable
 */
@@ -210,13 +216,34 @@
  */
 #define FTS_POWER_SOURCE_CUST_EN                1
 
+/*
+ * enable/disable touchpad
+ */
+#define LCT_TP_WORK_EN                          1
+
+/*
+* enable/disable 'grip area' feature
+*/
+#define LCT_TP_GRIP_AREA_EN                     1
+
+
+/*
+ * enable tp usb plugin feature
+ */
+#define LCT_TP_USB_PLUGIN                       0
+
+/*
+ * enable/disable palm feature
+ */
+#define LCT_TP_PALM_EN                             1
+
 /****************************************************/
 
 /********************** Upgrade ****************************/
 /*
  * auto upgrade
  */
-#define FTS_AUTO_UPGRADE_EN                     1
+#define FTS_AUTO_UPGRADE_EN                     0
 
 /*
  * auto upgrade for lcd cfg
