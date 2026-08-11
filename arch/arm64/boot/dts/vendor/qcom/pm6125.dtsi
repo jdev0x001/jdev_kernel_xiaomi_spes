@@ -161,6 +161,49 @@
 		};
 	};
 
+	/* PM6125 flash/torch peripheral lives on SPMI slave ID 3. */
+	qcom,pm6125@3 {
+		compatible = "qcom,spmi-pmic";
+		reg = <0x3 0x0>;
+		#address-cells = <2>;
+		#size-cells = <0>;
+
+		pm6125_flash: qcom,leds@d300 {
+			compatible = "qcom,qpnp-flash-led-v2";
+			status = "okay";
+			reg = <0xd300 0x100>;
+			label = "flash";
+			interrupts = <0x3 0xd3 0x0 IRQ_TYPE_EDGE_RISING>,
+				     <0x3 0xd3 0x3 IRQ_TYPE_EDGE_RISING>,
+				     <0x3 0xd3 0x4 IRQ_TYPE_EDGE_RISING>;
+			interrupt-names = "led-fault-irq",
+					  "all-ramp-down-done-irq",
+					  "all-ramp-up-done-irq";
+			qcom,isc-delay = <192>;
+
+			pm6125_flash0: qcom,flash_0 {
+				label = "flash";
+				qcom,led-name = "led:flash_0";
+				qcom,max-current = <1500>;
+				qcom,default-led-trigger = "flash0_trigger";
+				qcom,id = <0>;
+				qcom,current-ma = <1000>;
+				qcom,duration-ms = <1280>;
+				qcom,ires-ua = <12500>;
+			};
+
+			pm6125_torch0: qcom,torch_0 {
+				label = "torch";
+				qcom,led-name = "led:torch_0";
+				qcom,max-current = <500>;
+				qcom,default-led-trigger = "torch0_trigger";
+				qcom,id = <0>;
+				qcom,current-ma = <300>;
+				qcom,ires-ua = <12500>;
+			};
+		};
+	};
+
 	qcom,pm6125@1 {
 		compatible ="qcom,spmi-pmic";
 		reg = <0x1 0x0>;
