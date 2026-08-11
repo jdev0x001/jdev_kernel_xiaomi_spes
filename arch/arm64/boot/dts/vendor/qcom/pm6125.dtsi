@@ -155,27 +155,15 @@
 			#gpio-cells = <2>;
 		};
 
-		pm6125_rtc: qcom,pm6125_rtc {
-			compatible = "qcom,pm8941-rtc";
-			interrupts = <0x0 0x61 0x1 IRQ_TYPE_NONE>;
-		};
-	};
-
-	/* PM6125 flash/torch peripheral lives on SPMI slave ID 3. */
-	qcom,pm6125@3 {
-		compatible = "qcom,spmi-pmic";
-		reg = <0x3 0x0>;
-		#address-cells = <2>;
-		#size-cells = <0>;
-
+		/* Flash/torch peripheral is on PM6125 slave 0. */
 		pm6125_flash: qcom,leds@d300 {
 			compatible = "qcom,qpnp-flash-led-v2";
 			status = "okay";
 			reg = <0xd300 0x100>;
 			label = "flash";
-			interrupts = <0x3 0xd3 0x0 IRQ_TYPE_EDGE_RISING>,
-				     <0x3 0xd3 0x3 IRQ_TYPE_EDGE_RISING>,
-				     <0x3 0xd3 0x4 IRQ_TYPE_EDGE_RISING>;
+			interrupts = <0x0 0xd3 0x0 IRQ_TYPE_EDGE_RISING>,
+				     <0x0 0xd3 0x3 IRQ_TYPE_EDGE_RISING>,
+				     <0x0 0xd3 0x4 IRQ_TYPE_EDGE_RISING>;
 			interrupt-names = "led-fault-irq",
 					  "all-ramp-down-done-irq",
 					  "all-ramp-up-done-irq";
@@ -201,6 +189,11 @@
 				qcom,current-ma = <300>;
 				qcom,ires-ua = <12500>;
 			};
+		};
+
+		pm6125_rtc: qcom,pm6125_rtc {
+			compatible = "qcom,pm8941-rtc";
+			interrupts = <0x0 0x61 0x1 IRQ_TYPE_NONE>;
 		};
 	};
 
