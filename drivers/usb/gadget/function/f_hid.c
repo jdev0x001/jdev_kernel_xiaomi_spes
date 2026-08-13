@@ -1323,6 +1323,7 @@ static struct usb_function *hidg_alloc(struct usb_function_instance *fi)
 	opts = container_of(fi, struct f_hid_opts, func_inst);
 
 	mutex_lock(&opts->lock);
+	++opts->refcnt;
 
 	spin_lock_init(&hidg->write_spinlock);
 	spin_lock_init(&hidg->read_spinlock);
@@ -1335,8 +1336,11 @@ static struct usb_function *hidg_alloc(struct usb_function_instance *fi)
 	hidg->dev.class = hidg_class;
 	hidg->dev.devt = MKDEV(major, opts->minor);
 	ret = dev_set_name(&hidg->dev, "hidg%d", opts->minor);
-	if (ret)
-		goto err_put_device;
+	if (ret) {
+		--opts->refcnt;
+		mutex_unlock(&opts->lock);
+		return ERR_PTR(ret);
+	}
 
 	hidg->bInterfaceSubClass = opts->subclass;
 	hidg->bInterfaceProtocol = opts->protocol;
@@ -1347,27 +1351,13 @@ static struct usb_function *hidg_alloc(struct usb_function_instance *fi)
 					    opts->report_desc_length,
 					    GFP_KERNEL);
 		if (!hidg->report_desc) {
-			ret = -ENOMEM;
-			goto err_put_device;
+			put_device(&hidg->dev);
+			--opts->refcnt;
+			mutex_unlock(&opts->lock);
+			return ERR_PTR(-ENOMEM);
 		}
 	}
 	hidg->use_out_ep = !opts->no_out_endpoint;
-
-	++opts->refcnt;
-	/* HACK, replace content, duplicate code from above */
-	hidg->bInterfaceSubClass = hid_data.subclass;
-	hidg->bInterfaceProtocol = hid_data.protocol;
-	hidg->report_length = hid_data.report_length;
-	hidg->report_desc_length = hid_data.report_desc_length;
-	hidg->report_desc = kmemdup(hid_data.report_desc,
-			hid_data.report_desc_length,
-			GFP_KERNEL);
-	if (!hidg->report_desc) {
-		kfree(hidg);
-		mutex_unlock(&opts->lock);
-		return ERR_PTR(-ENOMEM);
-	}
-
 
 	mutex_unlock(&opts->lock);
 
@@ -1384,11 +1374,6 @@ static struct usb_function *hidg_alloc(struct usb_function_instance *fi)
 
 	kref_init(&hidg->kref);
 	return &hidg->func;
-
-err_put_device:
-	put_device(&hidg->dev);
-	mutex_unlock(&opts->lock);
-	return ERR_PTR(ret);
 }
 
 DECLARE_USB_FUNCTION_INIT(hid, hidg_alloc_inst, hidg_alloc);
