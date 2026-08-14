@@ -28,8 +28,8 @@ jobs:
       run: |
         mkdir -p clang
         cd clang
-        curl -LO https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20260807-release/Clang-16.0.6-20260807.tar.gz
-        tar -xf Clang-16.0.6-20260807.tar.gz --strip-components=1
+        curl -LO https://github.com/greenforce-project/greenforce_clang/releases/download/20260811/gf-clang-24.0.0-20260811.tar.gz
+        tar -xf gf-clang-24.0.0-20260811.tar.gz --strip-components=1
         cd ..
 
     - name: Prepare Toolchain Environment
