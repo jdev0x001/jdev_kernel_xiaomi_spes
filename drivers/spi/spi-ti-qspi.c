@@ -826,7 +826,7 @@ no_dma:
 	qspi->mmap_enabled = false;
 	qspi->current_cs = -1;
 
-	ret = spi_register_master(master);
+	ret = devm_spi_register_master(&pdev->dev, master);
 	if (!ret)
 		return 0;
 
@@ -841,17 +841,16 @@ free_master:
 static int ti_qspi_remove(struct platform_device *pdev)
 {
 	struct ti_qspi *qspi = platform_get_drvdata(pdev);
+	int rc;
 
-	spi_master_get(qspi->master);
-
-	spi_unregister_master(qspi->master);
+	rc = spi_master_suspend(qspi->master);
+	if (rc)
+		return rc;
 
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 
 	ti_qspi_dma_cleanup(qspi);
-
-	spi_master_put(qspi->master);
 
 	return 0;
 }
