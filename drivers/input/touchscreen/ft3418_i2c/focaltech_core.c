@@ -41,7 +41,6 @@
 #include <linux/notifier.h>
 #include <linux/fb.h>
 #include <drm/drm_panel.h>
-#include <linux/msm_drm_notify.h>
 #elif defined(CONFIG_DRM)
 #if defined(CONFIG_DRM_PANEL)
 #include <drm/drm_panel.h>
