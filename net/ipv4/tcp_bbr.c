@@ -221,7 +221,7 @@ static const int bbr_startup_cwnd_gain = BBR_UNIT * 2;
 /* The pacing gain in BBR_DRAIN is calculated to typically drain
  * the queue created in BBR_STARTUP in a single round:
  */
-static const int bbr_drain_gain = BBR_UNIT * 1000 / 2885;
+static const int bbr_drain_gain = BBR_UNIT * 1000 / 1800;
 /* The gain for deriving steady-state cwnd tolerates delayed/stretched ACKs: */
 static const int bbr_cwnd_gain  = BBR_UNIT * 2;
 /* The pacing_gain values for the PROBE_BW gain cycle, to discover/share bw: */
@@ -308,7 +308,7 @@ static const bool bbr_loss_probe_recovery = true;
  * and loss rate is higher than bbr_loss_thresh.
  * Disabled if 0.
  */
-static const u32 bbr_full_loss_cnt = 6;
+static const u32 bbr_full_loss_cnt = 2;
 
 /* Exit STARTUP if number of round trips with ECN mark rate above ecn_thresh
  * meets this count.
@@ -316,7 +316,7 @@ static const u32 bbr_full_loss_cnt = 6;
 static const u32 bbr_full_ecn_cnt = 2;
 
 /* Fraction of unutilized headroom to try to leave in path upon high loss. */
-static const u32 bbr_inflight_headroom = BBR_UNIT * 15 / 100;
+static const u32 bbr_inflight_headroom = BBR_UNIT * 20 / 100;
 
 /* How much do we increase cwnd_gain when probing for bandwidth in
  * BBR_BW_PROBE_UP? This specifies the increment in units of
