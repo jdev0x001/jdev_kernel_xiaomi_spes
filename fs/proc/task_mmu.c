@@ -19,6 +19,11 @@
 #include <linux/shmem_fs.h>
 #include <linux/uaccess.h>
 #include <linux/pkeys.h>
+
+#if defined(CONFIG_KSU_SUSFS_SUS_KSTAT) || defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)
+#include <linux/susfs_def.h>
+#endif
+
 #include <linux/mm_inline.h>
 #include <linux/ctype.h>
 
@@ -371,15 +376,40 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	dev_t dev = 0;
 	const char *name = NULL;
 
-	if (file) {
-		struct inode *inode = file_inode(vma->vm_file);
-		dev = inode->i_sb->s_dev;
-		ino = inode->i_ino;
-#ifdef CONFIG_NOMOUNT
-		nomount_spoof_mmap_metadata(inode, &dev, &ino);
+#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
+	char *spoofed_redirected_name = NULL;
 #endif
-		pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
+
+	if (file) {
+    struct inode *inode = file_inode(vma->vm_file);
+
+#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
+    if (SUSFS_IS_INODE_OPEN_REDIRECT(inode)) {
+        if (!susfs_open_redirect_spoof_show_map_vma(inode, &ino, &dev,
+                                                   spoofed_redirected_name)) {
+            pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
+            goto orig_flow;
+        }
+    }
+#endif
+
+#ifdef CONFIG_KSU_SUSFS_SUS_MAP
+    if (SUSFS_IS_INODE_SUS_MAP(inode))
+        return;
+#endif
+
+    dev = inode->i_sb->s_dev;
+    ino = inode->i_ino;
+    pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
+
+#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+    susfs_sus_kstat_spoof_show_map_vma(inode, &dev, &ino);
+#endif
 	}
+
+#ifdef CONFIG_KSU_SUSFS_OPEN_REDIRECT
+    orig_flow:
+#endif
 
 	start = vma->vm_start;
 	end = vma->vm_end;
@@ -936,6 +966,20 @@ static int show_smaps_rollup(struct seq_file *m, void *v)
 	hold_task_mempolicy(priv);
 
 	for (vma = priv->mm->mmap; vma; vma = vma->vm_next) {
+		#ifdef CONFIG_KSU_SUSFS_SUS_MAP
+    if (vma->vm_file) {
+        if (SUSFS_IS_INODE_SUS_MAP(file_inode(vma->vm_file)))
+            goto bypass_orig_flow;
+    }
+#endif
+
+    smap_gather_stats(vma, &mss);
+
+#ifdef CONFIG_KSU_SUSFS_SUS_MAP
+bypass_orig_flow:
+#endif
+
+    last_vma_end = vma->vm_end;
 		smap_gather_stats(vma, &mss);
 		last_vma_end = vma->vm_end;
 	}
