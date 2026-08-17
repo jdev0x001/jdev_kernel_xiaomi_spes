@@ -43,7 +43,7 @@ jobs:
         export SUBARCH=${{ env.SUBARCH }}
         
         sed -i 's/local short/return 0/g' scripts/setlocalversion     
-        curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/refs/heads/legacy/kernel/setup.sh" | bash -s legacy
+        curl -LSs "https://raw.githubusercontent.com/yuksk-cyber/KernelSU-Next/refs/heads/legacy-susfs/kernel/setup.sh" | bash -s legacy-susfs
         curl -LSs "https://raw.githubusercontent.com/JackA1ltman/NonGKI_Kernel_Build_2nd/mainline/Patches/syscall_hook_patches.sh" | bash -s mainline
         curl -LSs "https://raw.githubusercontent.com/xxblebleblexx/nomount-installer/refs/heads/installer/nomount.sh" | bash -s 4.19
         echo "CONFIG_KSU=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG }}
