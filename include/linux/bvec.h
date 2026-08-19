@@ -141,4 +141,11 @@ static inline void bvec_iter_skip_zero_bvec(struct bvec_iter *iter)
 	.bi_bvec_done	= 0,						\
 }
 
+#define bvec_nth_page(page, idx) ((idx) == 0 ? (page) : nth_page((page), (idx)))
+
+#define mp_bvec_for_each_page(pg, bv, i)				\
+	for (i = (bv)->bv_offset / PAGE_SIZE;				\
+		(i <= (((bv)->bv_offset + (bv)->bv_len - 1) / PAGE_SIZE)) && \
+		(pg = bvec_nth_page((bv)->bv_page, i)); i += 1)
+
 #endif /* __LINUX_BVEC_ITER_H */
